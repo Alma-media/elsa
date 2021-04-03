@@ -35,7 +35,6 @@ func main() {
 		log.Fatalf("failed to initialize a client: %s", token.Error())
 	}
 
-	manager := flow.NewManager(client)
 	storage := &pipe.InMemoryStorage{
 		Pipe: []pipe.Element{
 			{
@@ -58,8 +57,20 @@ func main() {
 					pipe.Reverse,
 				},
 			},
+			{
+				BaseElement: pipe.BaseElement{
+					Input:  "/a",
+					Output: "/c",
+				},
+				Processors: []pipe.Processor{
+					pipe.Print,
+					pipe.Reverse,
+				},
+			},
 		},
 	}
+
+	manager := flow.NewManager(client)
 
 	handler, err := api.NewHandler(storage, manager)
 	if err != nil {
