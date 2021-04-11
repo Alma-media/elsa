@@ -2,6 +2,10 @@ package pipe
 
 import "log"
 
+// TODO: replace local processors
+// processors["count", "reverse"]
+// means forward IN to -> count: process: count-out -> reverse: proceess: reverse-out -> OUT
+
 // Processor is a struct/function to process the input data before putting it to the output.
 type Processor interface {
 	Process(data []byte) ([]byte, error)
