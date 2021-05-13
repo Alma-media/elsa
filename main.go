@@ -43,8 +43,8 @@ func main() {
 					Output: "/output",
 				},
 				Processors: []pipe.Processor{
-					pipe.Print,
-					pipe.Reverse,
+					// pipe.Print(),
+					// pipe.Reverse(),
 				},
 			},
 			{
@@ -53,8 +53,8 @@ func main() {
 					Output: "/b",
 				},
 				Processors: []pipe.Processor{
-					pipe.Print,
-					pipe.Reverse,
+					// pipe.Print(),
+					// pipe.Reverse(),
 				},
 			},
 			{
@@ -63,8 +63,8 @@ func main() {
 					Output: "/c",
 				},
 				Processors: []pipe.Processor{
-					pipe.Print,
-					pipe.Reverse,
+					// pipe.Print,
+					// pipe.Reverse,
 				},
 			},
 		},

@@ -25,8 +25,7 @@ func createHandler(publisher Publisher, outputs map[string][]pipe.Processor) mqt
 					}
 				}
 
-				token := publisher.Publish(output, 0, false, string(data))
-				token.Wait()
+				publisher.Publish(output, 0, false, string(data)).Wait()
 			}(output, processors)
 		}
 	}

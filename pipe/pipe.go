@@ -36,9 +36,20 @@ func (e *Element) UnmarshalJSON(data []byte) error {
 	e.BaseElement = base
 
 	for _, element := range base.Pipe {
-		processor, ok := processors[element]
+
+		fn, err := NewFunction(element)
+		if err != nil {
+			return err
+		}
+
+		processorFactory, ok := processors[fn.Name]
 		if !ok {
 			return fmt.Errorf("unknown processor: %s", element)
+		}
+
+		processor, err := processorFactory(fn.Args...)
+		if err != nil {
+			return err
 		}
 
 		e.Processors = append(e.Processors, processor)

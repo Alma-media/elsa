@@ -1,6 +1,11 @@
 package pipe
 
-import "log"
+import (
+	"errors"
+	"log"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+)
 
 // TODO: replace local processors
 // processors["count", "reverse"]
@@ -17,23 +22,53 @@ func (fn ProcessorFunc) Process(data []byte) ([]byte, error) {
 	return fn(data)
 }
 
-var Reverse ProcessorFunc = func(in []byte) ([]byte, error) {
-	out := make([]byte, len(in))
-
-	for index, symbol := range in {
-		out[len(in)-index-1] = symbol
+func Reverse(args ...interface{}) (ProcessorFunc, error) {
+	if len(args) > 0 {
+		return nil, errors.New("no arguments expected")
 	}
 
-	return out, nil
+	return func(in []byte) ([]byte, error) {
+		out := make([]byte, len(in))
+
+		for index, symbol := range in {
+			out[len(in)-index-1] = symbol
+		}
+
+		return out, nil
+	}, nil
 }
 
-var Print ProcessorFunc = func(in []byte) ([]byte, error) {
+func Print(args ...interface{}) (ProcessorFunc, error) {
+	if len(args) > 0 {
+		return nil, errors.New("no arguments expected")
+	}
+
+	return func(in []byte) ([]byte, error) {
+		log.Printf("Message: %s", in)
+
+		return in, nil
+	}, nil
+}
+
+var processors = map[string]ProcessorFactory{
+	"print":   Print,
+	"reverse": Reverse,
+}
+
+type ProcessorFactory func(args ...interface{}) (ProcessorFunc, error)
+
+type PipeProcessor struct {
+	mqtt.Client
+}
+
+func NewPipeProcessor(client mqtt.Client) *PipeProcessor {
+	return &PipeProcessor{
+		client,
+	}
+}
+
+func (proc *PipeProcessor) Pipe(in []byte) ([]byte, error) {
 	log.Printf("Message: %s", in)
 
 	return in, nil
-}
-
-var processors = map[string]Processor{
-	"print":   Print,
-	"reverse": Reverse,
 }
