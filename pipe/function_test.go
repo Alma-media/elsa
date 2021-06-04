@@ -1,7 +1,7 @@
 package pipe
 
-import "testing"
+// import "testing"
 
-func Test_Function(t *testing.T) {
-	NewFunction("foo(42)")
-}
+// func Test_Function(t *testing.T) {
+// 	NewFunction("foo(42)")
+// }

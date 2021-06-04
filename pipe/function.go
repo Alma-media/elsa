@@ -31,6 +31,11 @@ func NewFunction(input string) (*Function, error) {
 	}
 
 	fn.Name = matches[1]
+
+	if matches[2] == "" {
+		return &fn, nil
+	}
+
 	args := strings.Split(matches[2], ",")
 
 	for _, arg := range args {

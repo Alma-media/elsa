@@ -39,6 +39,9 @@ func Reverse(args ...interface{}) (ProcessorFunc, error) {
 }
 
 func Print(args ...interface{}) (ProcessorFunc, error) {
+
+	log.Println("PRINT ARGS:", len(args), args)
+
 	if len(args) > 0 {
 		return nil, errors.New("no arguments expected")
 	}
