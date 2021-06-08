@@ -11,7 +11,7 @@ import (
 
 	"github.com/Alma-media/elsa/api"
 	"github.com/Alma-media/elsa/flow"
-	"github.com/Alma-media/elsa/pipe"
+	"github.com/Alma-media/elsa/storage/memory"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -23,7 +23,7 @@ var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 func main() {
 	mqtt.DEBUG = log.New(os.Stdout, "", 0)
 	mqtt.ERROR = log.New(os.Stdout, "", 0)
-	opts := mqtt.NewClientOptions().AddBroker("tcp://localhost:1883").SetClientID("emqx_test_client")
+	opts := mqtt.NewClientOptions().AddBroker("tcp://localhost:1883").SetClientID("elsa")
 
 	opts.SetKeepAlive(60 * time.Second)
 	// Message callback handler
@@ -35,42 +35,10 @@ func main() {
 		log.Fatalf("failed to initialize a client: %s", token.Error())
 	}
 
-	storage := &pipe.InMemoryStorage{
-		Pipe: []pipe.Element{
-			{
-				BaseElement: pipe.BaseElement{
-					Input:  "/input",
-					Output: "/output",
-				},
-				Processors: []pipe.Processor{
-					pipe.Print,
-					pipe.Reverse,
-				},
-			},
-			{
-				BaseElement: pipe.BaseElement{
-					Input:  "/a",
-					Output: "/b",
-				},
-				Processors: []pipe.Processor{
-					pipe.Print,
-					pipe.Reverse,
-				},
-			},
-			{
-				BaseElement: pipe.BaseElement{
-					Input:  "/a",
-					Output: "/c",
-				},
-				Processors: []pipe.Processor{
-					pipe.Print,
-					pipe.Reverse,
-				},
-			},
-		},
-	}
-
-	manager := flow.NewManager(client)
+	var (
+		storage = &memory.Storage{}
+		manager = flow.NewManager(client)
+	)
 
 	handler, err := api.NewHandler(storage, manager)
 	if err != nil {
