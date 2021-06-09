@@ -35,7 +35,11 @@ func (e *Element) UnmarshalJSON(data []byte) error {
 
 	e.BaseElement = base
 
-	for _, element := range base.Pipe {
+	return e.Resolve()
+}
+
+func (e *Element) Resolve() error {
+	for _, element := range e.BaseElement.Pipe {
 		processor, ok := processors[element]
 		if !ok {
 			return fmt.Errorf("unknown processor: %s", element)
