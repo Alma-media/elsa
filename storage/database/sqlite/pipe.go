@@ -10,7 +10,7 @@ import (
 
 var (
 	deleteQuery = `DELETE from route;`
-	selectQuery = `SELECT input, output, pipe FROM route;`
+	selectQuery = `SELECT input, output, pipe FROM route ORDER BY input, output;`
 	insertQuery = `INSERT INTO route (input, output, pipe) VALUES(?, ?, ?);`
 )
 

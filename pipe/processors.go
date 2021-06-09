@@ -1,6 +1,10 @@
 package pipe
 
-import "log"
+import (
+	"bytes"
+	"encoding/binary"
+	"log"
+)
 
 // Processor is a struct/function to process the input data before putting it to the output.
 type Processor interface {
@@ -11,6 +15,16 @@ type ProcessorFunc func([]byte) ([]byte, error)
 
 func (fn ProcessorFunc) Process(data []byte) ([]byte, error) {
 	return fn(data)
+}
+
+var Count ProcessorFunc = func(in []byte) ([]byte, error) {
+	var buff bytes.Buffer
+
+	if err := binary.Write(&buff, binary.LittleEndian, int64(len(in))); err != nil {
+		return nil, err
+	}
+
+	return buff.Bytes(), nil
 }
 
 var Reverse ProcessorFunc = func(in []byte) ([]byte, error) {
@@ -30,6 +44,7 @@ var Print ProcessorFunc = func(in []byte) ([]byte, error) {
 }
 
 var processors = map[string]Processor{
+	"count":   Count,
 	"print":   Print,
 	"reverse": Reverse,
 }
