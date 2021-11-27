@@ -2,21 +2,20 @@ package sqlite
 
 import (
 	"database/sql"
-	"strings"
 
-	"github.com/Alma-media/elsa/pipe"
+	"github.com/Alma-media/elsa/flow"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
 	deleteQuery = `DELETE from route;`
-	selectQuery = `SELECT input, output, pipe FROM route ORDER BY input, output;`
-	insertQuery = `INSERT INTO route (input, output, pipe) VALUES(?, ?, ?);`
+	selectQuery = `SELECT input, output FROM route ORDER BY input, output;`
+	insertQuery = `INSERT INTO route (input, output) VALUES(?, ?);`
 )
 
 type PipeManager struct{}
 
-func (PipeManager) Load(tx *sql.Tx, recv *pipe.Pipe) error {
+func (PipeManager) Load(tx *sql.Tx, recv *flow.Pipe) error {
 	rows, err := tx.Query(selectQuery)
 	if err != nil {
 		return err
@@ -25,20 +24,9 @@ func (PipeManager) Load(tx *sql.Tx, recv *pipe.Pipe) error {
 	defer rows.Close()
 
 	for rows.Next() {
-		var (
-			functions sql.NullString
-			element   pipe.Element
-		)
+		var element flow.Element
 
-		if err := rows.Scan(&element.Input, &element.Output, &functions); err != nil {
-			return err
-		}
-
-		if functions.Valid {
-			element.Pipe = strings.Split(functions.String, ";")
-		}
-
-		if err := element.Resolve(); err != nil {
+		if err := rows.Scan(&element.Input, &element.Output); err != nil {
 			return err
 		}
 
@@ -48,8 +36,8 @@ func (PipeManager) Load(tx *sql.Tx, recv *pipe.Pipe) error {
 	return nil
 }
 
-func (PipeManager) Save(tx *sql.Tx, element pipe.Element) error {
-	_, err := tx.Exec(insertQuery, element.Input, element.Output, strings.Join(element.Pipe, ";"))
+func (PipeManager) Save(tx *sql.Tx, element flow.Element) error {
+	_, err := tx.Exec(insertQuery, element.Input, element.Output)
 
 	return err
 }

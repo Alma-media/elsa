@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/Alma-media/elsa/pipe"
+	"github.com/Alma-media/elsa/flow"
 )
 
 type Storage interface {
-	Load(context.Context) (pipe.Pipe, error)
-	Save(context.Context, pipe.Pipe) error
+	Load(context.Context) (flow.Pipe, error)
+	Save(context.Context, flow.Pipe) error
 }
 
 type Manager interface {
-	Apply(context.Context, pipe.Pipe) (<-chan struct{}, error)
+	Apply(context.Context, flow.Pipe) (<-chan struct{}, error)
 }
 
 type Handler struct {
@@ -74,7 +74,7 @@ func (h *Handler) ApplyHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	var pipe pipe.Pipe
+	var pipe flow.Pipe
 
 	if err := json.NewDecoder(r.Body).Decode(&pipe); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

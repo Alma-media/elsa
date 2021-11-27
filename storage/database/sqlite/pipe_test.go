@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Alma-media/elsa/pipe"
+	"github.com/Alma-media/elsa/flow"
 	"github.com/Alma-media/elsa/storage/database"
 )
 
@@ -43,7 +43,7 @@ func TestPipeManagerLoad(t *testing.T) {
 	defer release()
 
 	t.Run("load empty pipe", func(t *testing.T) {
-		var pipe pipe.Pipe
+		var pipe flow.Pipe
 
 		if err := new(PipeManager).Load(tx, &pipe); err != nil {
 			t.Errorf("unexpected error: %s", err)
@@ -64,27 +64,15 @@ func TestPipeManagerLoad(t *testing.T) {
 		}
 
 		var (
-			actual   pipe.Pipe
-			expected = pipe.Pipe{
+			actual   flow.Pipe
+			expected = flow.Pipe{
 				{
-					BaseElement: pipe.BaseElement{
-						Input:  "bar",
-						Output: "baz",
-					},
+					Input:  "bar",
+					Output: "baz",
 				},
 				{
-					BaseElement: pipe.BaseElement{
-						Input:  "foo",
-						Output: "bar",
-						Pipe: []string{
-							"count",
-							"reverse",
-						},
-					},
-					Processors: []pipe.Processor{
-						pipe.Count,
-						pipe.Reverse,
-					},
+					Input:  "foo",
+					Output: "bar",
 				},
 			}
 		)
@@ -98,11 +86,11 @@ func TestPipeManagerLoad(t *testing.T) {
 		}
 
 		for index := range actual {
-			if !reflect.DeepEqual(actual[index].BaseElement, expected[index].BaseElement) {
+			if !reflect.DeepEqual(actual[index], expected[index]) {
 				t.Errorf(
 					"the output \n%#v\ndoes not match expected\n%#v",
-					actual[index].BaseElement,
-					expected[index].BaseElement,
+					actual[index],
+					expected[index],
 				)
 			}
 		}
@@ -114,15 +102,9 @@ func TestPipeManagerSave(t *testing.T) {
 	defer release()
 
 	t.Run("save new routes", func(t *testing.T) {
-		element := pipe.Element{
-			BaseElement: pipe.BaseElement{
-				Input:  "foo",
-				Output: "bar",
-				Pipe: []string{
-					"print",
-					"reverse",
-				},
-			},
+		element := flow.Element{
+			Input:  "foo",
+			Output: "bar",
 		}
 
 		if err := new(PipeManager).Save(tx, element); err != nil {

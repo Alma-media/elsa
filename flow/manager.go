@@ -6,36 +6,46 @@ import (
 	"log"
 	"sync"
 
-	"github.com/Alma-media/elsa/pipe"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
+
+// Pipe is a linear list of onput/output bindings.
+type Pipe []Element
+
+type Element struct {
+	Input  string `json:"input"`
+	Output string `json:"output"`
+}
+
+type Publisher interface {
+	Publish(string, byte, bool, interface{}) mqtt.Token
+}
 
 type Manager struct {
 	mu sync.Mutex
 
 	mqtt.Client
 
-	// map[input][output][]Processor
-	subscriptions map[string]map[string][]pipe.Processor
+	subscriptions map[string]map[string]struct{}
 }
 
-// NewManager creates a new manager.
+// NewManager creates a new flow manager.
 func NewManager(client mqtt.Client) *Manager { return &Manager{Client: client} }
 
 // TODO:
 // - detect circular deps
-func (m *Manager) Apply(ctx context.Context, elements pipe.Pipe) (<-chan struct{}, error) {
+func (m *Manager) Apply(ctx context.Context, elements Pipe) (<-chan struct{}, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	await := make(chan struct{})
 
-	m.subscriptions = make(map[string]map[string][]pipe.Processor)
+	m.subscriptions = make(map[string]map[string]struct{})
 
 	for _, element := range elements {
 		outputs, ok := m.subscriptions[element.Input]
 		if !ok {
-			outputs = make(map[string][]pipe.Processor)
+			outputs = make(map[string]struct{})
 			m.subscriptions[element.Input] = outputs
 
 			token := m.Subscribe(element.Input, 0, createHandler(m.Client, outputs))
@@ -48,7 +58,7 @@ func (m *Manager) Apply(ctx context.Context, elements pipe.Pipe) (<-chan struct{
 			return nil, fmt.Errorf("input %q and output %q already linked", element.Input, element.Output)
 		}
 
-		outputs[element.Output] = element.Processors
+		outputs[element.Output] = struct{}{}
 	}
 
 	go func() {
@@ -64,4 +74,12 @@ func (m *Manager) Apply(ctx context.Context, elements pipe.Pipe) (<-chan struct{
 	}()
 
 	return await, nil
+}
+
+func createHandler(publisher Publisher, outputs map[string]struct{}) mqtt.MessageHandler {
+	return func(client mqtt.Client, msg mqtt.Message) {
+		for output := range outputs {
+			publisher.Publish(output, 0, false, string(msg.Payload())).Wait()
+		}
+	}
 }
