@@ -10,9 +10,7 @@ import (
 	"github.com/Alma-media/elsa/storage/database"
 )
 
-var (
-	_ database.PipeManager = new(PipeManager)
-)
+var _ database.PipeManager = new(PipeManager)
 
 func setup(t *testing.T) (*sql.Tx, func() error) {
 	db, err := sql.Open("sqlite3", "file::memory:")
@@ -55,11 +53,11 @@ func TestPipeManagerLoad(t *testing.T) {
 	})
 
 	t.Run("load non-empty pipe", func(t *testing.T) {
-		if _, err := tx.Exec(insertQuery, "foo", "bar", "count;reverse"); err != nil {
+		if _, err := tx.Exec(insertQuery, "foo", "bar", []byte(`{"retain":true}`)); err != nil {
 			t.Fatalf("failed to insert test data: %s", err)
 		}
 
-		if _, err := tx.Exec(insertQuery, "bar", "baz", nil); err != nil {
+		if _, err := tx.Exec(insertQuery, "bar", "baz", []byte(`{"retain":false}`)); err != nil {
 			t.Fatalf("failed to insert test data: %s", err)
 		}
 
@@ -69,10 +67,16 @@ func TestPipeManagerLoad(t *testing.T) {
 				{
 					Input:  "bar",
 					Output: "baz",
+					Options: flow.Options{
+						Retain: false,
+					},
 				},
 				{
 					Input:  "foo",
 					Output: "bar",
+					Options: flow.Options{
+						Retain: true,
+					},
 				},
 			}
 		)
@@ -82,7 +86,7 @@ func TestPipeManagerLoad(t *testing.T) {
 		}
 
 		if len(actual) != len(expected) {
-			t.Errorf("pipe was expected to contain %d elements", len(expected))
+			t.Errorf("pipe was expected to contain %d elements, got %d", len(expected), len(actual))
 		}
 
 		for index := range actual {
@@ -105,6 +109,9 @@ func TestPipeManagerSave(t *testing.T) {
 		element := flow.Element{
 			Input:  "foo",
 			Output: "bar",
+			Options: flow.Options{
+				Retain: true,
+			},
 		}
 
 		if err := new(PipeManager).Save(tx, element); err != nil {

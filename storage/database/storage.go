@@ -18,9 +18,10 @@ type Storage struct {
 	manager PipeManager
 }
 
-func NewStorage(db *sql.DB) *Storage {
+func NewStorage(db *sql.DB, manager PipeManager) *Storage {
 	return &Storage{
-		db: db,
+		db:      db,
+		manager: manager,
 	}
 }
 

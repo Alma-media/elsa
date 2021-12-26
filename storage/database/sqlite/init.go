@@ -8,6 +8,7 @@ import (
 var createTable = "CREATE TABLE IF NOT EXISTS \"route\" (" +
 	"`input` text NOT NULL," +
 	"`output` text NOT NULL," +
+	"`options` blob," +
 	"PRIMARY KEY (input, output)" +
 	");"
 
