@@ -9,10 +9,16 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-// Pipe is a linear list of onput/output bindings.
+// Pipe is a linear list of input/output bindings.
 type Pipe []Element
 
+type Options struct {
+	Retain bool `json:"retain"`
+}
+
 type Element struct {
+	Options
+
 	Input  string `json:"input"`
 	Output string `json:"output"`
 }
@@ -26,7 +32,7 @@ type Manager struct {
 
 	mqtt.Client
 
-	subscriptions map[string]map[string]struct{}
+	subscriptions map[string]map[string]Options
 }
 
 // NewManager creates a new flow manager.
@@ -40,12 +46,12 @@ func (m *Manager) Apply(ctx context.Context, elements Pipe) (<-chan struct{}, er
 
 	await := make(chan struct{})
 
-	m.subscriptions = make(map[string]map[string]struct{})
+	m.subscriptions = make(map[string]map[string]Options)
 
 	for _, element := range elements {
 		outputs, ok := m.subscriptions[element.Input]
 		if !ok {
-			outputs = make(map[string]struct{})
+			outputs = make(map[string]Options)
 			m.subscriptions[element.Input] = outputs
 
 			token := m.Subscribe(element.Input, 0, createHandler(m.Client, outputs))
@@ -58,7 +64,7 @@ func (m *Manager) Apply(ctx context.Context, elements Pipe) (<-chan struct{}, er
 			return nil, fmt.Errorf("input %q and output %q already linked", element.Input, element.Output)
 		}
 
-		outputs[element.Output] = struct{}{}
+		outputs[element.Output] = element.Options
 	}
 
 	go func() {
@@ -76,10 +82,10 @@ func (m *Manager) Apply(ctx context.Context, elements Pipe) (<-chan struct{}, er
 	return await, nil
 }
 
-func createHandler(publisher Publisher, outputs map[string]struct{}) mqtt.MessageHandler {
+func createHandler(publisher Publisher, outputs map[string]Options) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
-		for output := range outputs {
-			publisher.Publish(output, 0, false, string(msg.Payload())).Wait()
+		for output, options := range outputs {
+			publisher.Publish(output, 0, options.Retain, string(msg.Payload())).Wait()
 		}
 	}
 }
