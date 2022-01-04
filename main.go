@@ -79,26 +79,14 @@ func main() {
 		log.Fatalf("failed to initialize a client: %s", token.Error())
 	}
 
-	var manager = flow.NewManager(client)
-
-	routes, err := storage.Load(ctx)
-	if err != nil {
-		log.Fatalf("failed to load existing flows: %s", err)
-	}
-
-	await, err := manager.Apply(ctx, routes)
-	if err != nil {
-		log.Fatalf("failed to apply existing flows: %s", err)
-	}
-
-	<-await
-
-	handler, err := api.NewHandler(storage, manager)
+	handler, err := api.NewHandler(storage, flow.NewManager(client))
 	if err != nil {
 		log.Fatalf("failed to create a handler: %s", err)
 	}
 
 	go func() {
+		log.Printf("Started API on port %d", appConfig.HTTP.Port)
+
 		http.ListenAndServe(
 			fmt.Sprintf(":%d", appConfig.HTTP.Port),
 			http.HandlerFunc(handler.ApplyHandler),
