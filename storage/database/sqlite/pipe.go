@@ -2,21 +2,21 @@ package sqlite
 
 import (
 	"database/sql"
-	"strings"
+	"encoding/json"
 
-	"github.com/Alma-media/elsa/pipe"
+	"github.com/Alma-media/elsa/flow"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
 	deleteQuery = `DELETE from route;`
-	selectQuery = `SELECT input, output, pipe FROM route ORDER BY input, output;`
-	insertQuery = `INSERT INTO route (input, output, pipe) VALUES(?, ?, ?);`
+	selectQuery = `SELECT input, output, options FROM route ORDER BY input, output;`
+	insertQuery = `INSERT INTO route (input, output, options) VALUES(?, ?, ?);`
 )
 
 type PipeManager struct{}
 
-func (PipeManager) Load(tx *sql.Tx, recv *pipe.Pipe) error {
+func (PipeManager) Load(tx *sql.Tx, recv *flow.Pipe) error {
 	rows, err := tx.Query(selectQuery)
 	if err != nil {
 		return err
@@ -26,30 +26,31 @@ func (PipeManager) Load(tx *sql.Tx, recv *pipe.Pipe) error {
 
 	for rows.Next() {
 		var (
-			functions sql.NullString
-			element   pipe.Element
+			element flow.Element
+			data    []byte
 		)
 
-		if err := rows.Scan(&element.Input, &element.Output, &functions); err != nil {
+		if err := rows.Scan(&element.Input, &element.Output, &data); err != nil {
 			return err
 		}
 
-		if functions.Valid {
-			element.Pipe = strings.Split(functions.String, ";")
-		}
-
-		if err := element.Resolve(); err != nil {
+		if err := json.Unmarshal(data, &element.Options); err != nil {
 			return err
 		}
 
 		*recv = append(*recv, element)
 	}
 
-	return nil
+	return rows.Err()
 }
 
-func (PipeManager) Save(tx *sql.Tx, element pipe.Element) error {
-	_, err := tx.Exec(insertQuery, element.Input, element.Output, strings.Join(element.Pipe, ";"))
+func (PipeManager) Save(tx *sql.Tx, element flow.Element) error {
+	data, err := json.Marshal(element.Options)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(insertQuery, element.Input, element.Output, data)
 
 	return err
 }

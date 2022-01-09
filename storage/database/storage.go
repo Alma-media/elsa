@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/Alma-media/elsa/pipe"
+	"github.com/Alma-media/elsa/flow"
 )
 
 type PipeManager interface {
 	Drop(tx *sql.Tx) error
-	Load(tx *sql.Tx, pipe *pipe.Pipe) error
-	Save(tx *sql.Tx, element pipe.Element) error
+	Load(tx *sql.Tx, pipe *flow.Pipe) error
+	Save(tx *sql.Tx, element flow.Element) error
 }
 
 type Storage struct {
@@ -18,13 +18,14 @@ type Storage struct {
 	manager PipeManager
 }
 
-func NewStorage(db *sql.DB) *Storage {
+func NewStorage(db *sql.DB, manager PipeManager) *Storage {
 	return &Storage{
-		db: db,
+		db:      db,
+		manager: manager,
 	}
 }
 
-func (storage *Storage) Load(ctx context.Context) (pipe.Pipe, error) {
+func (storage *Storage) Load(ctx context.Context) (flow.Pipe, error) {
 	tx, err := storage.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -32,7 +33,7 @@ func (storage *Storage) Load(ctx context.Context) (pipe.Pipe, error) {
 
 	defer tx.Rollback()
 
-	var pipe pipe.Pipe
+	var pipe flow.Pipe
 
 	if err := storage.manager.Load(tx, &pipe); err != nil {
 		return nil, err
@@ -45,7 +46,7 @@ func (storage *Storage) Load(ctx context.Context) (pipe.Pipe, error) {
 	return pipe, nil
 }
 
-func (storage *Storage) Save(ctx context.Context, pipe pipe.Pipe) error {
+func (storage *Storage) Save(ctx context.Context, pipe flow.Pipe) error {
 	tx, err := storage.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err

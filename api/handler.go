@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/Alma-media/elsa/pipe"
+	"github.com/Alma-media/elsa/flow"
 )
 
 type Storage interface {
-	Load(context.Context) (pipe.Pipe, error)
-	Save(context.Context, pipe.Pipe) error
+	Load(context.Context) (flow.Pipe, error)
+	Save(context.Context, flow.Pipe) error
 }
 
 type Manager interface {
-	Apply(context.Context, pipe.Pipe) (<-chan struct{}, error)
+	Apply(context.Context, flow.Pipe) (<-chan struct{}, error)
 }
 
 type Handler struct {
@@ -68,13 +68,33 @@ func (h *Handler) Stop() {
 	<-h.await
 }
 
+func (h *Handler) LoadHandler(w http.ResponseWriter, r *http.Request) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	pipe, err := h.storage.Load(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(pipe); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		return
+	}
+}
+
 func (h *Handler) ApplyHandler(w http.ResponseWriter, r *http.Request) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
 	defer r.Body.Close()
 
-	var pipe pipe.Pipe
+	var pipe flow.Pipe
 
 	if err := json.NewDecoder(r.Body).Decode(&pipe); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
