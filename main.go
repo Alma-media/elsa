@@ -89,7 +89,16 @@ func main() {
 
 		http.ListenAndServe(
 			fmt.Sprintf(":%d", appConfig.HTTP.Port),
-			http.HandlerFunc(handler.ApplyHandler),
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.Method {
+				case http.MethodGet:
+					handler.LoadHandler(w, r)
+				case http.MethodPost:
+					handler.ApplyHandler(w, r)
+				default:
+					http.Error(w, fmt.Sprintf("Method %q not allowed", r.Method), http.StatusMethodNotAllowed)
+				}
+			}),
 		)
 	}()
 

@@ -17,10 +17,10 @@ type Options struct {
 }
 
 type Element struct {
-	Options
-
 	Input  string `json:"input"`
 	Output string `json:"output"`
+
+	Options
 }
 
 type Publisher interface {
