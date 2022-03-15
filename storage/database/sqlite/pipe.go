@@ -10,8 +10,8 @@ import (
 
 var (
 	deleteQuery = `DELETE from route;`
-	selectQuery = `SELECT input, output, options FROM route ORDER BY input, output;`
-	insertQuery = `INSERT INTO route (input, output, options) VALUES(?, ?, ?);`
+	selectQuery = `SELECT input, output, item FROM route ORDER BY input, output;`
+	insertQuery = `INSERT INTO route (input, output, item) VALUES(?, ?, ?);`
 )
 
 type PipeManager struct{}
@@ -26,31 +26,38 @@ func (PipeManager) Load(tx *sql.Tx, recv *flow.Pipe) error {
 
 	for rows.Next() {
 		var (
-			element flow.Element
-			data    []byte
+			item flow.Route
+			data []byte
 		)
 
-		if err := rows.Scan(&element.Input, &element.Output, &data); err != nil {
+		if err := rows.Scan(
+			&item.Input.Path, &item.Output.Path, &data,
+		); err != nil {
 			return err
 		}
 
-		if err := json.Unmarshal(data, &element.Options); err != nil {
+		if err := json.Unmarshal(data, &item); err != nil {
 			return err
 		}
 
-		*recv = append(*recv, element)
+		*recv = append(*recv, item)
 	}
 
 	return rows.Err()
 }
 
-func (PipeManager) Save(tx *sql.Tx, element flow.Element) error {
-	data, err := json.Marshal(element.Options)
+func (PipeManager) Save(tx *sql.Tx, item flow.Route) error {
+	data, err := json.Marshal(item)
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.Exec(insertQuery, element.Input, element.Output, data)
+	_, err = tx.Exec(
+		insertQuery,
+		item.Input.Path,
+		item.Output.Path,
+		data,
+	)
 
 	return err
 }

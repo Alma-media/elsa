@@ -65,17 +65,25 @@ func TestPipeManagerLoad(t *testing.T) {
 			actual   flow.Pipe
 			expected = flow.Pipe{
 				{
-					Input:  "bar",
-					Output: "baz",
-					Options: flow.Options{
-						Retain: false,
+					Input: flow.Element{
+						Path: "bar",
+					},
+					Output: flow.Element{
+						Path: "baz",
+						Options: flow.Options{
+							Retain: false,
+						},
 					},
 				},
 				{
-					Input:  "foo",
-					Output: "bar",
-					Options: flow.Options{
-						Retain: true,
+					Input: flow.Element{
+						Path: "foo",
+					},
+					Output: flow.Element{
+						Path: "bar",
+						Options: flow.Options{
+							Retain: true,
+						},
 					},
 				},
 			}
@@ -106,11 +114,15 @@ func TestPipeManagerSave(t *testing.T) {
 	defer release()
 
 	t.Run("save new routes", func(t *testing.T) {
-		element := flow.Element{
-			Input:  "foo",
-			Output: "bar",
-			Options: flow.Options{
-				Retain: true,
+		element := flow.Route{
+			Input: flow.Element{
+				Path: "foo",
+			},
+			Output: flow.Element{
+				Path: "bar",
+				Options: flow.Options{
+					Retain: true,
+				},
 			},
 		}
 

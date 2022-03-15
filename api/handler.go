@@ -94,9 +94,14 @@ func (h *Handler) ApplyHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	var pipe flow.Pipe
+	var (
+		pipe    flow.Pipe
+		decoder = json.NewDecoder(r.Body)
+	)
 
-	if err := json.NewDecoder(r.Body).Decode(&pipe); err != nil {
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(&pipe); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 
 		return

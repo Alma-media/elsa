@@ -10,7 +10,7 @@ import (
 type PipeManager interface {
 	Drop(tx *sql.Tx) error
 	Load(tx *sql.Tx, pipe *flow.Pipe) error
-	Save(tx *sql.Tx, element flow.Element) error
+	Save(tx *sql.Tx, item flow.Route) error
 }
 
 type Storage struct {
@@ -58,8 +58,8 @@ func (storage *Storage) Save(ctx context.Context, pipe flow.Pipe) error {
 		return err
 	}
 
-	for _, element := range pipe {
-		if err := storage.manager.Save(tx, element); err != nil {
+	for _, item := range pipe {
+		if err := storage.manager.Save(tx, item); err != nil {
 			return err
 		}
 	}
