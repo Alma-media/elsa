@@ -70,9 +70,9 @@ func TestPipeManagerLoad(t *testing.T) {
 					},
 					Output: flow.Element{
 						Path: "baz",
-						Options: flow.Options{
-							Retain: false,
-						},
+					},
+					Options: flow.Options{
+						Retain: false,
 					},
 				},
 				{
@@ -81,9 +81,9 @@ func TestPipeManagerLoad(t *testing.T) {
 					},
 					Output: flow.Element{
 						Path: "bar",
-						Options: flow.Options{
-							Retain: true,
-						},
+					},
+					Options: flow.Options{
+						Retain: true,
 					},
 				},
 			}
@@ -120,9 +120,9 @@ func TestPipeManagerSave(t *testing.T) {
 			},
 			Output: flow.Element{
 				Path: "bar",
-				Options: flow.Options{
-					Retain: true,
-				},
+			},
+			Options: flow.Options{
+				Retain: true,
 			},
 		}
 

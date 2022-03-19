@@ -4,19 +4,19 @@ package flow
 type Pipe []Route
 
 type Options struct {
-	Retain bool `json:"retain"`
+	Retain      bool   `json:"retain"`
+	Description string `json:"description"`
 }
 
 type Route struct {
-	Input  Element     `json:"input"`
-	Output Element     `json:"output"`
-	Meta   interface{} `json:"meta"`
+	Input  Element `json:"input"`
+	Output Element `json:"output"`
+	Options
 }
 
 type Element struct {
 	Path string `json:"path"`
 	// Arguments []Argument `json:"arguments"`
-	Options
 }
 
 type Argument struct {

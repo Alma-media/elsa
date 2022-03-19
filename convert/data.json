@@ -1,0 +1,95 @@
+
+/*
+      input: '/switch/2ccfd6b1-afdb-4c94-a651-5e112084c360',
+      output: '/trig.in.switch/00',
+      retain: false
+  },
+  {
+      input: '/switch/5d09399e-8a48-41c5-9f47-83127d8a69e0',
+      output: '/trig.in.switch/00',
+      retain: false
+  },
+  {
+      input: '/trig.out.switch/00',
+      output: '/led/2ccfd6b1-afdb-4c94-a651-5e112084c360',
+      retain: true
+  },
+  {
+      input: '/trig.out.switch/00',
+      output: '/led/5d09399e-8a48-41c5-9f47-83127d8a69e0',
+      retain: true
+  },
+  {
+      input: '/trig.out.switch/00',
+      output: '/relay/3f8a79dc-854d-49d6-aa24-522422bf9140',
+      retain: true
+  }
+
+
+
+[
+  {
+    "id": "/bedroom",
+    "inputs": [
+      "/switch/2ccfd6b1-afdb-4c94-a651-5e112084c360",
+      "/switch/5d09399e-8a48-41c5-9f47-83127d8a69e0"
+    ],
+    "outputs": [
+      "/led/2ccfd6b1-afdb-4c94-a651-5e112084c360",
+      "/led/5d09399e-8a48-41c5-9f47-83127d8a69e0",
+      "/relay/3f8a79dc-854d-49d6-aa24-522422bf9140"
+    ]
+  }
+]
+
+
+[
+  {
+    "id": "/bedroom",
+    "inputs": [
+		{
+			"type": "switch",
+			"id": "2ccfd6b1-afdb-4c94-a651-5e112084c360"
+		},
+		{
+			"type": "switch",
+			"id": "5d09399e-8a48-41c5-9f47-83127d8a69e0"
+		}
+    ],
+    "outputs": [
+		{
+			"type": "led",
+			"id": "2ccfd6b1-afdb-4c94-a651-5e112084c360"
+		},
+		{
+			"type": "led",
+			"id": "5d09399e-8a48-41c5-9f47-83127d8a69e0"
+		},
+		{
+			"type": "relay",
+			"id": "3f8a79dc-854d-49d6-aa24-522422bf9140"
+		}
+    ]
+  }
+]
+
+*/
+
+/*
+
+{
+	"id": "42",
+	"inputs": [
+		"/switch/2ccfd6b1-afdb-4c94-a651-5e112084c360",
+		"/switch/5d09399e-8a48-41c5-9f47-83127d8a69e0",
+		"/uhf433/49e34b89-911d-4d7f-bee6-4624b93adaf3/459933"
+	],
+	"outputs": [
+		"/led/2ccfd6b1-afdb-4c94-a651-5e112084c360",
+		"/led/5d09399e-8a48-41c5-9f47-83127d8a69e0",
+		"/relay/3f8a79dc-854d-49d6-aa24-522422bf9140"
+	]
+}
+
+
+*/

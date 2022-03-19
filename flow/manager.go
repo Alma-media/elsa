@@ -18,7 +18,7 @@ type Manager struct {
 
 	mqtt.Client
 
-	subscriptions map[string]map[string]Element
+	subscriptions map[string]map[string]Options
 }
 
 // NewManager creates a new flow manager.
@@ -32,12 +32,12 @@ func (m *Manager) Apply(ctx context.Context, elements Pipe) (<-chan struct{}, er
 
 	await := make(chan struct{})
 
-	m.subscriptions = make(map[string]map[string]Element)
+	m.subscriptions = make(map[string]map[string]Options)
 
 	for _, route := range elements {
 		outputs, ok := m.subscriptions[route.Input.Path]
 		if !ok {
-			outputs = make(map[string]Element)
+			outputs = make(map[string]Options)
 			m.subscriptions[route.Input.Path] = outputs
 
 			token := m.Subscribe(route.Input.Path, 0, createHandler(m.Client, outputs))
@@ -54,7 +54,7 @@ func (m *Manager) Apply(ctx context.Context, elements Pipe) (<-chan struct{}, er
 			)
 		}
 
-		outputs[route.Output.Path] = route.Output
+		outputs[route.Output.Path] = route.Options
 	}
 
 	go func() {
@@ -72,7 +72,7 @@ func (m *Manager) Apply(ctx context.Context, elements Pipe) (<-chan struct{}, er
 	return await, nil
 }
 
-func createHandler(publisher Publisher, outputs map[string]Element) mqtt.MessageHandler {
+func createHandler(publisher Publisher, outputs map[string]Options) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		for output, options := range outputs {
 			publisher.Publish(output, 0, options.Retain, string(msg.Payload())).Wait()
