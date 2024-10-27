@@ -14,6 +14,7 @@ import (
 	"github.com/Alma-media/elsa/api"
 	"github.com/Alma-media/elsa/config"
 	"github.com/Alma-media/elsa/flow"
+	"github.com/Alma-media/elsa/model"
 	"github.com/Alma-media/elsa/storage/database"
 	"github.com/Alma-media/elsa/storage/database/sqlite"
 	"github.com/Alma-media/elsa/storage/memory"
@@ -27,8 +28,8 @@ var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 }
 
 type Storage interface {
-	Load(context.Context) (flow.Pipe, error)
-	Save(context.Context, flow.Pipe) error
+	Load(context.Context) (model.Pipe, error)
+	Save(context.Context, model.Pipe) error
 }
 
 func main() {

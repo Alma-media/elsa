@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/Alma-media/elsa/flow"
+	"github.com/Alma-media/elsa/model"
 )
 
 type Storage interface {
-	Load(context.Context) (flow.Pipe, error)
-	Save(context.Context, flow.Pipe) error
+	Load(context.Context) (model.Pipe, error)
+	Save(context.Context, model.Pipe) error
 }
 
 type Manager interface {
-	Apply(context.Context, flow.Pipe) (<-chan struct{}, error)
+	Apply(context.Context, model.Pipe) (<-chan struct{}, error)
 }
 
 type Handler struct {
@@ -79,6 +79,7 @@ func (h *Handler) LoadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
 	if err := json.NewEncoder(w).Encode(pipe); err != nil {
@@ -94,7 +95,7 @@ func (h *Handler) ApplyHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	var pipe flow.Pipe
+	var pipe model.Pipe
 
 	if err := json.NewDecoder(r.Body).Decode(&pipe); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Alma-media/elsa/flow"
+	"github.com/Alma-media/elsa/model"
 	"github.com/Alma-media/elsa/storage/database"
 )
 
@@ -41,7 +41,7 @@ func TestPipeManagerLoad(t *testing.T) {
 	defer release()
 
 	t.Run("load empty pipe", func(t *testing.T) {
-		var pipe flow.Pipe
+		var pipe model.Pipe
 
 		if err := new(PipeManager).Load(tx, &pipe); err != nil {
 			t.Errorf("unexpected error: %s", err)
@@ -62,19 +62,19 @@ func TestPipeManagerLoad(t *testing.T) {
 		}
 
 		var (
-			actual   flow.Pipe
-			expected = flow.Pipe{
+			actual   model.Pipe
+			expected = model.Pipe{
 				{
 					Input:  "bar",
 					Output: "baz",
-					Options: flow.Options{
+					Options: model.Options{
 						Retain: false,
 					},
 				},
 				{
 					Input:  "foo",
 					Output: "bar",
-					Options: flow.Options{
+					Options: model.Options{
 						Retain: true,
 					},
 				},
@@ -106,10 +106,10 @@ func TestPipeManagerSave(t *testing.T) {
 	defer release()
 
 	t.Run("save new routes", func(t *testing.T) {
-		element := flow.Element{
+		element := model.Element{
 			Input:  "foo",
 			Output: "bar",
-			Options: flow.Options{
+			Options: model.Options{
 				Retain: true,
 			},
 		}

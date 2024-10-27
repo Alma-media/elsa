@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/Alma-media/elsa/flow"
+	"github.com/Alma-media/elsa/model"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -16,7 +16,7 @@ var (
 
 type PipeManager struct{}
 
-func (PipeManager) Load(tx *sql.Tx, recv *flow.Pipe) error {
+func (PipeManager) Load(tx *sql.Tx, recv *model.Pipe) error {
 	rows, err := tx.Query(selectQuery)
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func (PipeManager) Load(tx *sql.Tx, recv *flow.Pipe) error {
 
 	for rows.Next() {
 		var (
-			element flow.Element
+			element model.Element
 			data    []byte
 		)
 
@@ -44,7 +44,7 @@ func (PipeManager) Load(tx *sql.Tx, recv *flow.Pipe) error {
 	return rows.Err()
 }
 
-func (PipeManager) Save(tx *sql.Tx, element flow.Element) error {
+func (PipeManager) Save(tx *sql.Tx, element model.Element) error {
 	data, err := json.Marshal(element.Options)
 	if err != nil {
 		return err
