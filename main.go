@@ -45,7 +45,7 @@ func main() {
 
 	switch appConfig.Storage.Type {
 	case "memory":
-		storage = new(memory.Storage)
+		storage = &memory.Storage{Pipe: model.Pipe{}}
 	case "database":
 		db, err := sql.Open(appConfig.Storage.Database.Driver, appConfig.Storage.Database.DSN)
 		if err != nil {

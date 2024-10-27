@@ -53,11 +53,11 @@ func TestPipeManagerLoad(t *testing.T) {
 	})
 
 	t.Run("load non-empty pipe", func(t *testing.T) {
-		if _, err := tx.Exec(insertQuery, "foo", "bar", []byte(`{"retain":true}`)); err != nil {
+		if _, err := tx.Exec(insertQuery, "the first", "foo", "bar", []byte(`{"retain":true}`)); err != nil {
 			t.Fatalf("failed to insert test data: %s", err)
 		}
 
-		if _, err := tx.Exec(insertQuery, "bar", "baz", []byte(`{"retain":false}`)); err != nil {
+		if _, err := tx.Exec(insertQuery, "the second", "bar", "baz", []byte(`{"retain":false}`)); err != nil {
 			t.Fatalf("failed to insert test data: %s", err)
 		}
 
@@ -65,6 +65,7 @@ func TestPipeManagerLoad(t *testing.T) {
 			actual   model.Pipe
 			expected = model.Pipe{
 				{
+					Alias:  "the second",
 					Input:  "bar",
 					Output: "baz",
 					Options: model.Options{
@@ -72,6 +73,7 @@ func TestPipeManagerLoad(t *testing.T) {
 					},
 				},
 				{
+					Alias:  "the first",
 					Input:  "foo",
 					Output: "bar",
 					Options: model.Options{
@@ -107,6 +109,7 @@ func TestPipeManagerSave(t *testing.T) {
 
 	t.Run("save new routes", func(t *testing.T) {
 		element := model.Element{
+			Alias:  "element",
 			Input:  "foo",
 			Output: "bar",
 			Options: model.Options{
@@ -125,11 +128,11 @@ func TestPipeManagerDrop(t *testing.T) {
 	defer release()
 
 	t.Run("drop previous routes", func(t *testing.T) {
-		if _, err := tx.Exec(insertQuery, "foo", "bar", "count;reverse"); err != nil {
+		if _, err := tx.Exec(insertQuery, "the first", "foo", "bar", "count;reverse"); err != nil {
 			t.Fatalf("failed to insert test data: %s", err)
 		}
 
-		if _, err := tx.Exec(insertQuery, "bar", "baz", nil); err != nil {
+		if _, err := tx.Exec(insertQuery, "the second", "bar", "baz", nil); err != nil {
 			t.Fatalf("failed to insert test data: %s", err)
 		}
 
