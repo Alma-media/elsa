@@ -22,5 +22,5 @@ type Database struct {
 
 type Broker struct {
 	DSN      string `default:"tcp://localhost:1883"`
-	ClientID string `default:"elsa"`
+	ClientID string `default:"elsa-router"`
 }
