@@ -6,6 +6,7 @@ import (
 )
 
 var createTable = "CREATE TABLE IF NOT EXISTS \"route\" (" +
+	"`alias` text NOT NULL," +
 	"`input` text NOT NULL," +
 	"`output` text NOT NULL," +
 	"`options` blob," +

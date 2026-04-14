@@ -6,22 +6,9 @@ import (
 	"log"
 	"sync"
 
+	"github.com/Alma-media/elsa/model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
-
-// Pipe is a linear list of input/output bindings.
-type Pipe []Element
-
-type Options struct {
-	Retain bool `json:"retain"`
-}
-
-type Element struct {
-	Input  string `json:"input"`
-	Output string `json:"output"`
-
-	Options
-}
 
 type Publisher interface {
 	Publish(string, byte, bool, interface{}) mqtt.Token
@@ -32,7 +19,7 @@ type Manager struct {
 
 	mqtt.Client
 
-	subscriptions map[string]map[string]Options
+	subscriptions map[string]map[string]model.Options
 }
 
 // NewManager creates a new flow manager.
@@ -40,18 +27,18 @@ func NewManager(client mqtt.Client) *Manager { return &Manager{Client: client} }
 
 // TODO:
 // - detect circular deps
-func (m *Manager) Apply(ctx context.Context, elements Pipe) (<-chan struct{}, error) {
+func (m *Manager) Apply(ctx context.Context, elements model.Pipe) (<-chan struct{}, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	await := make(chan struct{})
 
-	m.subscriptions = make(map[string]map[string]Options)
+	m.subscriptions = make(map[string]map[string]model.Options)
 
 	for _, element := range elements {
 		outputs, ok := m.subscriptions[element.Input]
 		if !ok {
-			outputs = make(map[string]Options)
+			outputs = make(map[string]model.Options)
 			m.subscriptions[element.Input] = outputs
 
 			token := m.Subscribe(element.Input, 0, createHandler(m.Client, outputs))
@@ -82,7 +69,7 @@ func (m *Manager) Apply(ctx context.Context, elements Pipe) (<-chan struct{}, er
 	return await, nil
 }
 
-func createHandler(publisher Publisher, outputs map[string]Options) mqtt.MessageHandler {
+func createHandler(publisher Publisher, outputs map[string]model.Options) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		for output, options := range outputs {
 			publisher.Publish(output, 0, options.Retain, string(msg.Payload())).Wait()

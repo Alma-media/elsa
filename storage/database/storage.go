@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/Alma-media/elsa/flow"
+	"github.com/Alma-media/elsa/model"
 )
 
 type PipeManager interface {
 	Drop(tx *sql.Tx) error
-	Load(tx *sql.Tx, pipe *flow.Pipe) error
-	Save(tx *sql.Tx, element flow.Element) error
+	Load(tx *sql.Tx, pipe *model.Pipe) error
+	Save(tx *sql.Tx, element model.Element) error
 }
 
 type Storage struct {
@@ -25,7 +25,7 @@ func NewStorage(db *sql.DB, manager PipeManager) *Storage {
 	}
 }
 
-func (storage *Storage) Load(ctx context.Context) (flow.Pipe, error) {
+func (storage *Storage) Load(ctx context.Context) (model.Pipe, error) {
 	tx, err := storage.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (storage *Storage) Load(ctx context.Context) (flow.Pipe, error) {
 
 	defer tx.Rollback()
 
-	var pipe flow.Pipe
+	var pipe model.Pipe
 
 	if err := storage.manager.Load(tx, &pipe); err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (storage *Storage) Load(ctx context.Context) (flow.Pipe, error) {
 	return pipe, nil
 }
 
-func (storage *Storage) Save(ctx context.Context, pipe flow.Pipe) error {
+func (storage *Storage) Save(ctx context.Context, pipe model.Pipe) error {
 	tx, err := storage.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
